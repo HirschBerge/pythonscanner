@@ -1,10 +1,10 @@
 # pythonscanner
 A simple Python network Scanner
-usage: scanner.py [-h] [-s s] [-H]
+usage: scanner.py [-h] [-s SCAN] [-H]
 
 Scan IP addresses.
 
 optional arguments:
-  -h, --help      show this help message and exit
-  -s s, --scan s  This scans things
-  -H, --hello     Enter your name, and we'll greet you!!
+  -h, --help            show this help message and exit
+  -s SCAN, --scan SCAN  This scans things
+  -H, --hello           We'll greet you!!
