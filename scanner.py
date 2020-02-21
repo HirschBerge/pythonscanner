@@ -11,7 +11,7 @@ parser.add_argument('-s', '--scan', default='1',
                     required=False, nargs='+', help='Enter as many IPs as you would like, separated by spaces. i.e. -s localhost 192.168.0.1')
 parser.add_argument('-H', '--hello', action='store_true',
                     help='We\'ll greet you!!')
-parser.add_argument('-p', '--port', type=str,
+parser.add_argument('-p', '--port', default='1-1000', type=str,
                     help='Enter ports in a range here. i.e. 1-100')
 args = parser.parse_args()
 port_list_range = args.port
@@ -22,11 +22,24 @@ portStart = int(portStarta)
 portEnd = int(portEnda)
 portEnd += 1
 ips = args.scan
-for i in range(0, len(ips)):
-    multi = ips[i]
-    if args.scan == '1':
-        pass
-    else:
+if args.scan == '1':
+    multi = input("You forgot to enter an IP, please enter one (1) here:")
+    startTime = time.time()
+    if __name__ == '__main__':
+        target = multi
+    t_IP = gethostbyname(target)
+    print('Starting scan on host: ', t_IP)
+
+    for i in range(portStart, portEnd):
+        s = socket(AF_INET, SOCK_STREAM)
+        conn = s.connect_ex((t_IP, i))
+        if(conn == 0):
+            print('Port %d: OPEN' % (i,))
+            s.close()
+        taken = time.time() - startTime
+else:
+    for i in range(0, len(ips)):
+        multi = ips[i]
         startTime = time.time()
         if __name__ == '__main__':
             target = multi
@@ -42,4 +55,5 @@ for i in range(0, len(ips)):
         taken = time.time() - startTime
 if args.hello:
     print('Hello there!')
-print(len(ips), 'hosts scanned in:', '{0:.4f}'.format(taken), 'seconds.')
+print('Scanned', portEnd - 1, 'ports per host on', len(ips),
+      'host(s) in:', '{0:.4f}'.format(taken), 'seconds.')
