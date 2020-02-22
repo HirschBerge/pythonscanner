@@ -1,12 +1,14 @@
 #!/usr/bin/python
 import argparse
 import platform
+import socket
 from socket import *
 import time
 import sys
 from datetime import datetime
 import os
-parser = argparse.ArgumentParser(description='Scan IP addresses.')
+parser = argparse.ArgumentParser(
+    description='Python IP scanning tool. By default, it returns your IP and  scans the same \'/24\' network that you\'re on. i.e. 10.10.10.0/24')
 parser.add_argument('-s', '--scan', default='1',
                     required=False, nargs='+', help='Enter as many IPs as you would like, separated by spaces. i.e. -s localhost 192.168.0.1')
 parser.add_argument('-H', '--hello', action='store_true',
@@ -22,22 +24,47 @@ portStart = int(portStarta)
 portEnd = int(portEnda)
 portEnd += 1
 ips = args.scan
-if args.scan == '1':
-    multi = input("You forgot to enter an IP, please enter one (1) here:")
-    startTime = time.time()
-    if __name__ == '__main__':
-        target = multi
-    t_IP = gethostbyname(target)
-    print('Starting scan on host: ', t_IP)
 
-    for i in range(portStart, portEnd):
-        s = socket(AF_INET, SOCK_STREAM)
-        conn = s.connect_ex((t_IP, i))
-        if(conn == 0):
-            print('Port %d: OPEN' % (i,))
-            s.close()
-        taken = time.time() - startTime
-else:
+
+def getIP():
+    s = socket(AF_INET, SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ipAddr = s.getsockname()[0]
+    return(ipAddr)
+    s.close()
+
+
+net = getIP()
+net1 = net.split('.')
+a = '.'
+
+net2 = net1[0] + a + net1[1] + a + net1[2] + a
+st1 = 0
+en1 = 255
+en1 = en1 + 1
+t1 = datetime.now()
+
+
+def scan(addr):
+    s = socket(AF_INET, SOCK_STREAM)
+    setdefaulttimeout(1)
+    result = s.connect_ex((addr, 135))
+    if result == 0:
+        return 1
+    else:
+        return 0
+
+
+def run1():
+    print('Your IP address is:', getIP())
+    for ip in range(st1, en1):
+        addr = net2 + str(ip)
+        if (scan(addr)):
+            print(addr, "is live")
+
+
+def IPgiven():
+
     for i in range(0, len(ips)):
         multi = ips[i]
         startTime = time.time()
@@ -52,8 +79,17 @@ else:
                 if(conn == 0):
                     print('Port %d: OPEN' % (i,))
                     s.close()
-        taken = time.time() - startTime
+    taken = time.time() - startTime
+    print('Scanned', portEnd - 1, 'ports per host on', len(ips),
+          'host(s) in:', '{0:.4f}'.format(taken), 'seconds.')
+
+
+if args.scan == '1':
+    run1()
+else:
+    IPgiven()
+
 if args.hello:
     print('Hello there!')
-print('Scanned', portEnd - 1, 'ports per host on', len(ips),
-      'host(s) in:', '{0:.4f}'.format(taken), 'seconds.')
+else:
+    pass
