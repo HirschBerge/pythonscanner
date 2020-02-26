@@ -80,7 +80,7 @@ def IPgiven():
                     print('Port %d: OPEN' % (i,))
                     s.close()
     taken = time.time() - startTime
-    print('Scanned', portEnd - 1, 'ports per host on', len(ips),
+    print('Scanned', (portEnd - 1) - portStart, 'ports per host on', len(ips),
           'host(s) in:', '{0:.4f}'.format(taken), 'seconds.')
 
 
