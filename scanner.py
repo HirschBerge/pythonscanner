@@ -8,13 +8,16 @@ import sys
 from datetime import datetime
 import os
 parser = argparse.ArgumentParser(
-    description='Python IP scanning tool. By default, it returns your IP and  scans the same \'/24\' network that you\'re on. i.e. 10.10.10.0/24')
+    description='Python IP scanning tool. By default, it returns your IP Address and performs a ping sweep of the network that you\'re on. i.e. 10.10.10.0/24')
 parser.add_argument('-s', '--scan', default='1',
                     required=False, nargs='+', help='Enter as many IPs as you would like, separated by spaces. i.e. -s localhost 192.168.0.1')
 parser.add_argument('-H', '--hello', action='store_true',
                     help='We\'ll greet you!!')
 parser.add_argument('-p', '--port', default='1-1000', type=str,
-                    help='Enter ports in a range here. i.e. 1-100')
+                    help='Enter ports in a range here. i.e. 1-100'),
+parser.add_argument('-v', '--service', default='ssh',
+                    help='When used with the ping sweep, specifies which service to sweep for.')
+
 args = parser.parse_args()
 port_list_range = args.port
 port_list_range = port_list_range.split('-')
@@ -42,6 +45,8 @@ st1 = 0
 en1 = 255
 en1 = en1 + 1
 t1 = datetime.now()
+
+
 def scan(addr):
     s = socket(AF_INET, SOCK_STREAM)
     setdefaulttimeout(1)
@@ -53,7 +58,7 @@ def scan(addr):
 
 
 def run1():
-    startTime= time.time()
+    startTime = time.time()
     print('Your IP address is:', getIP())
     for ip in range(st1, en1):
         addr = net2 + str(ip)
@@ -62,7 +67,10 @@ def run1():
 #        else:
 #            print(addr, " is unavailable for SSH")
     taken = time.time() - startTime
-    print('Scanned', (en1 - 1) - st1, 'host(s) in:', '{0:.4f}'.format(taken), 'seconds.')
+    print('Scanned', (en1 - 1) - st1, 'host(s) in:',
+          '{0:.4f}'.format(taken), 'seconds.')
+
+
 def IPgiven():
 
     for i in range(0, len(ips)):
@@ -85,7 +93,11 @@ def IPgiven():
 
 
 if args.scan == '1':
-    run1()
+    if args.service:
+        print('Service selected:', args.service)
+        run1()
+    else:
+        run1()
 else:
     IPgiven()
 
@@ -93,4 +105,3 @@ if args.hello:
     print('Hello there!')
 else:
     pass
-

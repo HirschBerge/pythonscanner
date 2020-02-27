@@ -9,4 +9,3 @@ sleep 3
 echo "..."
 sleep 1
 echo "And done!"
-
