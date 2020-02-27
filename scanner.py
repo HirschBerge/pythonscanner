@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import argparse
 import platform
 import socket
@@ -37,18 +37,15 @@ def getIP():
 net = getIP()
 net1 = net.split('.')
 a = '.'
-
 net2 = net1[0] + a + net1[1] + a + net1[2] + a
 st1 = 0
 en1 = 255
 en1 = en1 + 1
 t1 = datetime.now()
-
-
 def scan(addr):
     s = socket(AF_INET, SOCK_STREAM)
     setdefaulttimeout(1)
-    result = s.connect_ex((addr, 135))
+    result = s.connect_ex((addr, 22))
     if result == 0:
         return 1
     else:
@@ -56,13 +53,16 @@ def scan(addr):
 
 
 def run1():
+    startTime= time.time()
     print('Your IP address is:', getIP())
     for ip in range(st1, en1):
         addr = net2 + str(ip)
         if (scan(addr)):
-            print(addr, "is live")
-
-
+            print(addr, "is available for SSH")
+#        else:
+#            print(addr, " is unavailable for SSH")
+    taken = time.time() - startTime
+    print('Scanned', (en1 - 1) - st1, 'host(s) in:', '{0:.4f}'.format(taken), 'seconds.')
 def IPgiven():
 
     for i in range(0, len(ips)):
@@ -93,3 +93,4 @@ if args.hello:
     print('Hello there!')
 else:
     pass
+
