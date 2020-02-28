@@ -27,6 +27,34 @@ portStart = int(portStarta)
 portEnd = int(portEnda)
 portEnd += 1
 ips = args.scan
+services = {"chaos": 16,
+            "ftp1": 20,
+            "ftp": 21,
+            "ssh": 22,
+            "telnet": 23,
+            "smtp": 25,
+            "ipsec1": 50,
+            "ipsec2": 51,
+            "dns": 53,
+            "dhcp1": 67,
+            "dhcp2": 68,
+            "tftp": 69,
+            "http": 80,
+            "pop3": 110,
+            "nntp": 119,
+            "netbios1": 135,
+            "netbios2": 136,
+            "netbios3": 137,
+            "netbios4": 138,
+            "netbios5": 139,
+            "imap4": 143,
+            "snmp1": 161,
+            "snmp2": 162,
+            "ldap": 389,
+            "https": 443,
+            "rdp": 3389,
+            }
+serv = services[args.service]
 
 
 def getIP():
@@ -50,7 +78,7 @@ t1 = datetime.now()
 def scan(addr):
     s = socket(AF_INET, SOCK_STREAM)
     setdefaulttimeout(1)
-    result = s.connect_ex((addr, 22))
+    result = s.connect_ex((addr, int(serv)))
     if result == 0:
         return 1
     else:
@@ -63,7 +91,7 @@ def run1():
     for ip in range(st1, en1):
         addr = net2 + str(ip)
         if (scan(addr)):
-            print(addr, "is available for SSH")
+            print(addr, "is available for", args.service)
 #        else:
 #            print(addr, " is unavailable for SSH")
     taken = time.time() - startTime
@@ -88,13 +116,13 @@ def IPgiven():
                     print('Port %d: OPEN' % (i,))
                     s.close()
     taken = time.time() - startTime
-    print('Scanned', (portEnd - 1) - portStart, 'ports per host on', len(ips),
+    print('Scanned', portEnd - portStart, 'ports per host on', len(ips),
           'host(s) in:', '{0:.4f}'.format(taken), 'seconds.')
 
 
 if args.scan == '1':
     if args.service:
-        print('Service selected:', args.service)
+        print('Service selected:', args.service, "\nScanning on port: ", serv)
         run1()
     else:
         run1()
