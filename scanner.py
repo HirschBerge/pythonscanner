@@ -7,6 +7,8 @@ import time
 import sys
 from datetime import datetime
 import os
+import threading
+from queue import Queue
 parser = argparse.ArgumentParser(
     description='Python IP scanning tool. By default, it returns your IP Address and performs a ping sweep of the network that you\'re on. i.e. 10.10.10.0/24')
 parser.add_argument('-s', '--scan', default='1',
@@ -16,7 +18,9 @@ parser.add_argument('-H', '--hello', action='store_true',
 parser.add_argument('-p', '--port', default='1-1000', type=str,
                     help='Enter ports in a range here. i.e. 1-100'),
 parser.add_argument('-v', '--service', default='ssh',
-                    help='When used with the ping sweep, specifies which service to sweep for.')
+                    help='When used with the ping sweep, specifies which service to sweep for.'),
+parser.add_argument('--slow', default=0, action='store_true',
+                    help='Enables slow mode. Slower yet more reliable')
 
 args = parser.parse_args()
 port_list_range = args.port
@@ -27,6 +31,7 @@ portStart = int(portStarta)
 portEnd = int(portEnda)
 portEnd += 1
 ips = args.scan
+
 services = {"chaos": 16,
             "ftp1": 20,
             "ftp": 21,
@@ -92,8 +97,6 @@ def run1():
         addr = net2 + str(ip)
         if (scan(addr)):
             print(addr, "is available for", args.service)
-#        else:
-#            print(addr, " is unavailable for SSH")
     taken = time.time() - startTime
     print('Scanned', (en1 - 1) - st1, 'host(s) in:',
           '{0:.4f}'.format(taken), 'seconds.')
@@ -120,6 +123,48 @@ def IPgiven():
           'host(s) in:', '{0:.4f}'.format(taken), 'seconds.')
 
 
+def threaded():
+    for i in range(0, len(ips)):
+        multi = ips[i]
+        startTime = time.time()
+        setdefaulttimeout(1.5)
+        print_lock = threading.Lock()
+
+        target = multi
+        t_IP = gethostbyname(target)
+        print('Starting scan on host: ', t_IP)
+
+        def portscan(port):
+            s = socket(AF_INET, SOCK_STREAM)
+            try:
+                con = s.connect((t_IP, port))
+                with print_lock:
+                    print(port, 'is open')
+                con.close()
+            except:
+                pass
+
+        def threader():
+            while True:
+                worker = q.get()
+                portscan(worker)
+                q.task_done()
+
+        q = Queue()
+        startTime = time.time()
+
+        for x in range(portStart, portEnd):
+            t = threading.Thread(target=threader)
+            t.daemon = True
+            t.start()
+
+        for worker in range(portStart, portEnd):
+            q.put(worker)
+
+        q.join()
+        print('Time taken:', time.time() - startTime)
+
+
 if args.scan == '1':
     if args.service:
         print('Service selected:', args.service, "\nScanning on port: ", serv)
@@ -127,8 +172,10 @@ if args.scan == '1':
     else:
         run1()
 else:
-    IPgiven()
-
+    if args.slow == 1:
+        IPgiven()
+    else:
+        threaded()
 if args.hello:
     print('Hello there!')
 else:
